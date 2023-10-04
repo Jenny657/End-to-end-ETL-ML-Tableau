@@ -23,6 +23,8 @@ All data is stored in a relational database containing the following tables:
 * `current_weather_daily_20230927.csv` (weather forecast from 2023/09/27 - daily) and
 * `current_weather_hourly_20230927.csv` (weather forecast from 2023/09/27 - hourly).
 
+Since the storage on Github is limited I opted to provide the above mentioned *.csv files through a link, which can be found here: `Database-Tables/link-to-database-tables`
+
 ## 1.1. Prerequisites
 To run this project, you need an AWS account to run the project in the cloud.
 
@@ -41,23 +43,58 @@ Or just import all the prerequistites from `ETL-Pipeline/Lambda-Function/daily_w
 ## 1.2. Usage
 
 ### 1.2.1. Setting up AWS Lambda functions
-- I recommend creating separate AWS Lambda functions for different update schedules:
-  - Update city and airport information - only needs to run if a new city was added to the database manually.
-  - Update city information - should be updated yearly; older information will be stored with the respective year.
-  - Update weather and arrival flights - should be updated on a daily basis to retrieve information for the next day.
+I recommend creating a separate AWS Lambda function only for the current weather forecast, as this will be updated on a daily basis.
 
 Create the respective Lambda functions and copy the appropriate code from the ZIP-files in the folder /`Lambda functions` (don't forget to insert your MySQL endpoint and API credentials).
 
-The ZIP file contain the different code for the Lambda functions:
+The ZIP file contain the code for the Lambda function:
 
-- `static_tables.zip` creates the DataFrames for the tables `city_table`, `airport_table` and `city_airport_table` and loads the data into the AWS MySQL database, which is created by executing `set_up_project_5_aws.sql` in MySQL Workbench
-- `city_data_web_scraping.zip` web scrapes data for the cities in the the list from Wikipedia, creates a DataFrame for the table `city_data_table` and loads the data into the AWS MySQL database, which is created by executing `set_up_project_5_aws.sql` in MySQL Workbench
-- `weather_data_api_call.zip` creates the DataFrames for the table `weather_table` and loads the data into the AWS MySQL database, which is created by executing `set_up_project_5_aws.sql` in MySQL Workbench
-- `arrivals_data_api_call.zip` creates the DataFrames for the table `arrivals_table` and loads the data into the AWS MySQL database, which is created by executing `set_up_project_5_aws.sql` in MySQL Workbench
-- `all_in_one_weather_arrivals.zip` creates the DataFrames for the tables `arrivals_table` and `weather_table` and loads the data into the AWS MySQL database, which is created by executing `set_up_project_5_aws.sql` in MySQL Workbench <-- this Lambda function is a combination of `arrivals_data_api_call.zip` and `weather_data_api_call.zip` and does exactly the same as the two seperate functions. As the data extracted with these functions is to be updated daily, you can run this one function instead of the two separate ones.
+- `ETL-Pipeline/Lambda-Function/daily_weather_forecast.zip` creates the DataFrames for the tables `current_weather_daily.csv`and `current_weather_hourly.csv` and loads the data into the AWS MySQL database, which is created by executing `set_up_project_5_aws.sql` in MySQL Workbench
 
 - Add your layer (see Prerequisites) to the function.
 - Create an EventBridge schedule. There is a short tutorial [here](https://www.youtube.com/watch?v=lSqd6DVWZ9o&t).
+
+# 2. City Weather Prediction using SLTM Model
+
+This repository contains code for a City Weather Prediction model using an LSTM-based Sequential Learning Time Model (SLTM) implemented in TensorFlow. The model predicts daily maximum temperature and precipitation for multiple cities based on historical weather data. Here's a brief overview of the code and its functionalities:
+
+## 2.1 Data Collection
+The code collects historical weather data for target cities using an API and a provided CSV file (`cities_data_cls_ele.csv`). It retrieves data for various weather parameters, including maximum temperature, minimum temperature, mean temperature, precipitation, rain, snowfall, windspeed, shortwave radiation, and evapotranspiration.
+
+## 2.2 Data Preprocessing
+The collected data is preprocessed, including:
+- Scaling and one-hot encoding of selected features.
+- Encoding time variables such as day of the year and year.
+- Splitting the data into training, validation, and test sets.
+
+## 2.3 Model Architecture
+The SLTM model architecture consists of two LSTM layers followed by Dense layers for regression. The model is trained to predict daily maximum temperature and precipitation.
+
+## 2.4 Training and Evaluation
+The model is trained using the training and validation datasets. It uses Mean Squared Error (MSE) loss and Root Mean Squared Error (RMSE) as a metric for evaluation. A ModelCheckpoint callback is used to save the best model during training.
+
+## 2.5 Model Deployment
+The trained model can be saved and deployed for making predictions on future weather data. It can be loaded using `load_model` from TensorFlow.
+
+## 2.6 Post-processing
+The code includes post-processing functions to adjust the predicted temperature and precipitation using reference historical data. It applies corrections for trends, variability, and extreme events in the predictions.
+
+## 2.7 Model Evaluation
+The code also provides functionality to evaluate the model's performance using various metrics such as MAE, RMSE, R-squared, and Nash-Sutcliffe Efficiency.
+
+## 2.8 Future Predictions
+The model can be used to make predictions on future weather data for the target cities.
+
+For usage instructions and further details, please refer to the code files:
+
+- [FP_for_upload_final.ipynb](FP_for_upload_final.ipynb): Jupyter Notebook containing the code.
+- [FP_for_upload_final.py](FP_for_upload_final.py): Python script version of the code.
+- [requirements.txt](requirements.txt): Required packages and dependencies.
+- [best_model.h5](best_model.h5): The trained model.
+- [cities_data_cls_ele.csv](cities_data_cls_ele.csv): Historical weather data CSV file.
+
+Please refer to these files for implementation details and usage instructions.
+
 
 ## 3. Tableau Dashboard for Weather Data
 

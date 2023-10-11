@@ -52,7 +52,7 @@ The ZIP file contain the code for the Lambda function:
 - Add your layer (see Prerequisites) to the function.
 - Create an EventBridge schedule. There is a short tutorial [here](https://www.youtube.com/watch?v=lSqd6DVWZ9o&t).
 
-# 2. City Weather Prediction using SLTM Model
+# 2. City Weather Prediction using LSTM Model
 
 This repository contains code for a City Weather Prediction model using an LSTM-based Sequential Learning Time Model (SLTM) implemented in TensorFlow. The model predicts daily maximum temperature and precipitation for multiple cities based on historical weather data. Here's a brief overview of the code and its functionalities:
 
